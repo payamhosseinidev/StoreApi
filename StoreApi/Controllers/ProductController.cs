@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StoreApi.Models;
+using StoreApi.Services;
 
 namespace StoreApi.Controllers
 {
@@ -7,60 +8,59 @@ namespace StoreApi.Controllers
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
     {
-        private readonly List<Product> products = new()
-            {
-                new Product
-                {
-                    Id = 1,
-                    Name = "Laptop",
-                    Description = "Gaming Laptop",
-                    Category = "Electronics",
-                    Price = 45000000,
-                    ImageUrl = "laptop.jpg",
-                    Stock=5,
-                    CreatedAt = DateTime.Now,
-                },
-                new Product
-                {
-                    Id = 2,
-                    Name = "iPhone",
-                    Description = "Apple Mobile",
-                    Category = "Electronics",
-                    Price = 80000000,
-                    ImageUrl = "iphone.jpg",
-                    Stock=3,
-                    CreatedAt = DateTime.Now,
-                },
-                 new Product
-                {
-                    Id = 3,
-                    Name = "smart tv",
-                    Description = "television",
-                    Category = "Electronics",
-                    Price = 92000000,
-                    ImageUrl = "smarttv.jpg",
-                    Stock=7,
-                    CreatedAt = DateTime.Now,
-                }
-
-            };
+        private readonly IProductService _productService;
+        public ProductController(IProductService productService)
+        {
+            _productService = productService;
+        }
 
         [HttpGet]
-        public ActionResult<List<Product>> GetProducts()
+        public ActionResult<IEnumerable<Product>> GetProducts()
         {
+            var products = _productService.GetAllProducts();
             return Ok(products);
         }
 
         [HttpGet("{id}")]
         public ActionResult<Product> GetProduct(int id)
         {
-           
-            var product = products.FirstOrDefault(i=>i.Id == id);
-            if(product == null)
+
+            var product = _productService.GetProductById(id);
+            if (product == null)
             {
                 return NotFound();
             }
             return Ok(product);
+        }
+        [HttpPut]
+        public IActionResult UpdateProduct(Product product)
+        {
+            var result = _productService.Update(product);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
+        [HttpDelete("{id}")]
+        public IActionResult DeleteProduct(int id)
+        {
+            var success = _productService.Delete(id);
+            if (!success)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
+        [HttpPost]
+        public IActionResult PostProduct(Product product)
+        {
+            _productService.Add(product);
+            return CreatedAtAction(
+                nameof(GetProduct),
+                new { id = product.Id },
+                product
+            );
         }
     }
 }

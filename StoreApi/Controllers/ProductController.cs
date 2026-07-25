@@ -32,9 +32,13 @@ namespace StoreApi.Controllers
             }
             return Ok(product);
         }
-        [HttpPut]
-        public IActionResult UpdateProduct(Product product)
+        [HttpPut("{id}")]
+        public IActionResult UpdateProduct(int id,Product product)
         {
+            if(id != product.Id)
+            {
+                return BadRequest();
+            }
             var result = _productService.Update(product);
             if (!result)
             {
@@ -53,7 +57,7 @@ namespace StoreApi.Controllers
             return NoContent();
         }
         [HttpPost]
-        public IActionResult PostProduct(Product product)
+        public IActionResult CreateProduct(Product product)
         {
             _productService.Add(product);
             return CreatedAtAction(

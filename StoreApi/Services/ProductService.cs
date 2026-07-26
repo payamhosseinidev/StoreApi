@@ -1,4 +1,6 @@
 ﻿using StoreApi.Data;
+using StoreApi.DTOs;
+using StoreApi.Mappers;
 using StoreApi.Models;
 
 namespace StoreApi.Services
@@ -12,8 +14,9 @@ namespace StoreApi.Services
             _context = context;
         }
 
-        public void Add(Product product)
+        public void Add(CreateProductDto dto)
         {
+            var product = ProductMapper.ToEntity(dto);
             _context.Products.AddAsync(product);
             _context.SaveChanges();
         }
@@ -30,34 +33,47 @@ namespace StoreApi.Services
             return true;
         }
 
-        public IEnumerable<Product> GetAllProducts()
+        public IEnumerable<ProductDto> GetAllProducts()
         {
-            return _context.Products.ToList();
+            return _context.Products
+                .Select(p => new ProductDto
+                 {
+                     Id = p.Id,
+                     Name = p.Name,
+                     Description = p.Description,
+                     Category = p.Category,
+                     Price = p.Price,
+                     ImageUrl = p.ImageUrl,
+                     Stock = p.Stock,
+                     CreatedAt = p.CreatedAt
+                })
+            .ToList();
         }
 
-        public Product? GetProductById(int id)
+        public ProductDto? GetProductById(int id)
         {
-            return _context.Products.Find(id);
+            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+            if (product == null)
+            {
+                return null;
+            }
+            return ProductMapper.ToDto(product);
         }
 
-        public bool Update(Product product)
+        public bool Update(int id,UpdateProductDto dto)
         {
-            var existingProduct = _context.Products.Find(product.Id);
-            if (existingProduct == null)
+            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+            if (product == null)
             {
                 return false;
             }
             
-            existingProduct.Name = product.Name;
-            existingProduct.Description = product.Description;
-            existingProduct.Category = product.Category;
-            existingProduct.Price = product.Price;
-            existingProduct.Stock = product.Stock;
-            existingProduct.ImageUrl = product.ImageUrl;
+            ProductMapper.UpdateEntity(product, dto);
 
             _context.SaveChanges();
             return true;
           
         }
+
     }
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using StoreApi.DTOs;
 using StoreApi.Models;
 using StoreApi.Services;
 
@@ -15,14 +17,25 @@ namespace StoreApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> GetProducts()
+        public ActionResult<IEnumerable<ProductDto>> GetProducts()
         {
             var products = _productService.GetAllProducts();
+            var productDtos = products.Select(p => new ProductDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Category = p.Category,
+                Price = p.Price,
+                ImageUrl = p.ImageUrl,
+                Stock = p.Stock,
+                CreatedAt = p.CreatedAt
+            });
             return Ok(products);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Product> GetProduct(int id)
+        public ActionResult<ProductDto> GetProduct(int id)
         {
 
             var product = _productService.GetProductById(id);
@@ -32,14 +45,11 @@ namespace StoreApi.Controllers
             }
             return Ok(product);
         }
+
         [HttpPut("{id}")]
-        public IActionResult UpdateProduct(int id,Product product)
+        public IActionResult UpdateProduct(int id,UpdateProductDto dto)
         {
-            if(id != product.Id)
-            {
-                return BadRequest();
-            }
-            var result = _productService.Update(product);
+            var result = _productService.Update(id,dto);
             if (!result)
             {
                 return NotFound();
@@ -57,14 +67,10 @@ namespace StoreApi.Controllers
             return NoContent();
         }
         [HttpPost]
-        public IActionResult CreateProduct(Product product)
+        public IActionResult CreateProduct(CreateProductDto dto)
         {
-            _productService.Add(product);
-            return CreatedAtAction(
-                nameof(GetProduct),
-                new { id = product.Id },
-                product
-            );
+            _productService.Add(dto);
+            return Created();
         }
     }
 }

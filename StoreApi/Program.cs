@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StoreApi.Data;
+using StoreApi.Middleware;
 using StoreApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseMiddleware<ExeptionMiddleware>();
 
 app.UseHttpsRedirection();
 

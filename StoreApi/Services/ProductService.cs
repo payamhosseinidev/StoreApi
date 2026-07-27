@@ -1,4 +1,5 @@
-﻿using StoreApi.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using StoreApi.Data;
 using StoreApi.DTOs;
 using StoreApi.Mappers;
 using StoreApi.Models;
@@ -14,28 +15,28 @@ namespace StoreApi.Services
             _context = context;
         }
 
-        public void Add(CreateProductDto dto)
+        public async Task Add(CreateProductDto dto)
         {
             var product = ProductMapper.ToEntity(dto);
-            _context.Products.AddAsync(product);
-            _context.SaveChanges();
+            await _context.Products.AddAsync(product);
+            await _context.SaveChangesAsync();
         }
 
-        public bool Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            var product = _context.Products.Find(id);
+            var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
                 return false;
             }
             _context.Products.Remove(product);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return true;
         }
 
-        public IEnumerable<ProductDto> GetAllProducts()
+        public async Task<IEnumerable<ProductDto>> GetAllProducts()
         {
-            return _context.Products
+            return await _context.Products
                 .Select(p => new ProductDto
                  {
                      Id = p.Id,
@@ -47,12 +48,12 @@ namespace StoreApi.Services
                      Stock = p.Stock,
                      CreatedAt = p.CreatedAt
                 })
-            .ToList();
+            .ToListAsync();
         }
 
-        public ProductDto? GetProductById(int id)
+        public async Task<ProductDto?> GetProductById(int id)
         {
-            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
             if (product == null)
             {
                 return null;
@@ -60,9 +61,9 @@ namespace StoreApi.Services
             return ProductMapper.ToDto(product);
         }
 
-        public bool Update(int id,UpdateProductDto dto)
+        public async Task<bool> Update(int id,UpdateProductDto dto)
         {
-            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
             if (product == null)
             {
                 return false;
@@ -70,7 +71,7 @@ namespace StoreApi.Services
             
             ProductMapper.UpdateEntity(product, dto);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return true;
           
         }

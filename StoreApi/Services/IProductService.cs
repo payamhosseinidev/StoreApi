@@ -6,10 +6,10 @@ namespace StoreApi.Services
 {
     public interface IProductService
     {
-        IEnumerable<ProductDto> GetAllProducts();
-        ProductDto? GetProductById(int id);
-        void Add(CreateProductDto dto);
-        bool Update(int id,UpdateProductDto product);
-        bool Delete(int id);
+        Task<IEnumerable<ProductDto>> GetAllProducts();
+        Task<ProductDto?> GetProductById(int id);
+        Task Add(CreateProductDto dto);
+        Task<bool> Update(int id,UpdateProductDto product);
+        Task<bool> Delete(int id);
     }
 }

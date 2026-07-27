@@ -17,59 +17,44 @@ namespace StoreApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<ProductDto>> GetProducts()
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
         {
-            var products = _productService.GetAllProducts();
-            var productDtos = products.Select(p => new ProductDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Category = p.Category,
-                Price = p.Price,
-                ImageUrl = p.ImageUrl,
-                Stock = p.Stock,
-                CreatedAt = p.CreatedAt
-            });
+            var products = await _productService.GetAllProducts();
             return Ok(products);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<ProductDto> GetProduct(int id)
+        public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
-
-            var product = _productService.GetProductById(id);
+            var product = await _productService.GetProductById(id);
             if (product == null)
-            {
                 return NotFound();
-            }
+
             return Ok(product);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateProduct(int id,UpdateProductDto dto)
+        public async Task<IActionResult> UpdateProduct(int id,UpdateProductDto dto)
         {
-            var result = _productService.Update(id,dto);
+            var result = await _productService.Update(id,dto);
             if (!result)
-            {
                 return NotFound();
-            }
+            
             return NoContent();
         }
         [HttpDelete("{id}")]
-        public IActionResult DeleteProduct(int id)
+        public async Task<IActionResult> DeleteProduct(int id)
         {
-            var success = _productService.Delete(id);
+            var success = await _productService.Delete(id);
             if (!success)
-            {
                 return NotFound();
-            }
+
             return NoContent();
         }
         [HttpPost]
-        public IActionResult CreateProduct(CreateProductDto dto)
+        public async Task<IActionResult> CreateProduct(CreateProductDto dto)
         {
-            _productService.Add(dto);
+            await _productService.Add(dto);
             return Created();
         }
     }

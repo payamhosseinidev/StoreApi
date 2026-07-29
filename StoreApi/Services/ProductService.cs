@@ -1,59 +1,45 @@
-﻿using Microsoft.EntityFrameworkCore;
-using StoreApi.Data;
-using StoreApi.DTOs;
+﻿using StoreApi.DTOs;
 using StoreApi.Mappers;
-using StoreApi.Models;
+using StoreApi.Repositories;
 
 namespace StoreApi.Services
 {
     public class ProductService : IProductService
     {
-        private readonly AppDbContext _context;
+        private readonly IProductRepository _repository;
 
-        public ProductService(AppDbContext context)
+        public ProductService(IProductRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
-        public async Task Add(CreateProductDto dto)
+        public async Task<bool> Add(CreateProductDto dto)
         {
             var product = ProductMapper.ToEntity(dto);
-            await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
+            await _repository.AddAsync(product);
+            await _repository.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> Delete(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
+            var product = await _repository.GetByIdAsync(id);
+            if(product == null)
                 return false;
-            }
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            await _repository.DeleteAsync(product);
+            await _repository.SaveChangesAsync();
             return true;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProducts()
         {
-            return await _context.Products
-                .Select(p => new ProductDto
-                 {
-                     Id = p.Id,
-                     Name = p.Name,
-                     Description = p.Description,
-                     Category = p.Category,
-                     Price = p.Price,
-                     ImageUrl = p.ImageUrl,
-                     Stock = p.Stock,
-                     CreatedAt = p.CreatedAt
-                })
-            .ToListAsync();
+            var products = await _repository.GetAllAsync();
+            return products.Select(ProductMapper.ToDto);
         }
 
         public async Task<ProductDto?> GetProductById(int id)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var product = await _repository.GetByIdAsync(id);
             if (product == null)
             {
                 return null;
@@ -63,15 +49,13 @@ namespace StoreApi.Services
 
         public async Task<bool> Update(int id,UpdateProductDto dto)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var product = await _repository.GetByIdAsync(id);
             if (product == null)
-            {
                 return false;
-            }
             
             ProductMapper.UpdateEntity(product, dto);
+            await _repository.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
             return true;
           
         }

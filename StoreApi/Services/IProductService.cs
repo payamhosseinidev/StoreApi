@@ -8,7 +8,7 @@ namespace StoreApi.Services
     {
         Task<IEnumerable<ProductDto>> GetAllProducts();
         Task<ProductDto?> GetProductById(int id);
-        Task Add(CreateProductDto dto);
+        Task<bool> Add(CreateProductDto dto);
         Task<bool> Update(int id,UpdateProductDto product);
         Task<bool> Delete(int id);
     }

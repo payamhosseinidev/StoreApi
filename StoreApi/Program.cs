@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StoreApi.Data;
 using StoreApi.Middleware;
 using StoreApi.Repositories;
+using StoreApi.Responses;
 using StoreApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +21,28 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+        .Where(x => x.Value!.Errors.Count > 0)
+        .ToDictionary(
+             x => x.Key,
+             x => x.Value!.Errors
+                .Select(e => e.ErrorMessage)
+                .ToArray()
+        );
+        var response = new ValidationErrorResponse
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Message = "Validation Failed",
+            Errors = errors
+        };
+        return new BadRequestObjectResult(response);
+    };
 });
 
 var app = builder.Build();

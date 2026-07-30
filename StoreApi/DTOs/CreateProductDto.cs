@@ -4,9 +4,10 @@ namespace StoreApi.DTOs
 {
     public class CreateProductDto
     {
-
-        [Required]
-        [StringLength(100)]
+        [Display(Name = "نام محصول")]
+        [Required(ErrorMessage = "{0} الزامی است.")]
+        [MinLength(3)]
+        [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
         [Required]
@@ -16,7 +17,9 @@ namespace StoreApi.DTOs
         [Required]
         public string Category { get; set; } = string.Empty;
 
-        [Range(1, 1000000000)]
+        [Display(Name = "قیمت")]
+        [Range(1, 1000000000,
+            ErrorMessage = "{0} باید بین {1} و {2} باشد.")]
         public decimal Price { get; set; }
 
         public string ImageUrl { get; set; } = string.Empty;

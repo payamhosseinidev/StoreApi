@@ -5,6 +5,9 @@ using StoreApi.Middleware;
 using StoreApi.Repositories;
 using StoreApi.Responses;
 using StoreApi.Services;
+using FluentValidation;
+using StoreApi.Validators;
+using StoreApi.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +28,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
+    options.SuppressModelStateInvalidFilter = true;
     options.InvalidModelStateResponseFactory = context =>
     {
         var errors = context.ModelState
@@ -44,6 +48,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         return new BadRequestObjectResult(response);
     };
 });
+
+builder.Services.AddScoped<IValidator<CreateProductDto>, CreateProductDtoValidator>();
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
-﻿using StoreApi.DTOs;
+﻿using FluentValidation;
+using StoreApi.DTOs;
 using StoreApi.Mappers;
 using StoreApi.Repositories;
 
@@ -7,14 +8,21 @@ namespace StoreApi.Services
     public class ProductService : IProductService
     {
         private readonly IProductRepository _repository;
+        private readonly IValidator<CreateProductDto> _validator;
 
-        public ProductService(IProductRepository repository)
+        public ProductService(IProductRepository repository,IValidator<CreateProductDto> validator)
         {
             _repository = repository;
+            _validator = validator;
         }
 
         public async Task<bool> Add(CreateProductDto dto)
         {
+            var validationResult = await _validator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
             var product = ProductMapper.ToEntity(dto);
             await _repository.AddAsync(product);
             await _repository.SaveChangesAsync();

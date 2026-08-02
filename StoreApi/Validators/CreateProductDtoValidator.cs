@@ -19,7 +19,6 @@ namespace StoreApi.Validators
 
             RuleFor(x=>x.Stock)
                 .GreaterThanOrEqualTo(0).WithName("موجودی")
-
                  .WithMessage("{PropertyName} نمیتواند منفی باشد.");
         }
     }

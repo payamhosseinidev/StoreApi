@@ -1,6 +1,8 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using FluentValidation;
 using StoreApi.DTOs;
-using StoreApi.Mappers;
+using StoreApi.Mapping;
+using StoreApi.Models;
 using StoreApi.Repositories;
 
 namespace StoreApi.Services
@@ -9,11 +11,13 @@ namespace StoreApi.Services
     {
         private readonly IProductRepository _repository;
         private readonly IValidator<CreateProductDto> _validator;
+        private readonly IMapper _mapper;
 
-        public ProductService(IProductRepository repository,IValidator<CreateProductDto> validator)
+        public ProductService(IProductRepository repository,IValidator<CreateProductDto> validator,IMapper mapper)
         {
             _repository = repository;
             _validator = validator;
+            _mapper = mapper;
         }
 
         public async Task<bool> Add(CreateProductDto dto)
@@ -23,7 +27,7 @@ namespace StoreApi.Services
             {
                 throw new ValidationException(validationResult.Errors);
             }
-            var product = ProductMapper.ToEntity(dto);
+            var product = _mapper.Map<Product>(dto);
             await _repository.AddAsync(product);
             await _repository.SaveChangesAsync();
             return true;
@@ -42,7 +46,7 @@ namespace StoreApi.Services
         public async Task<IEnumerable<ProductDto>> GetAllProducts()
         {
             var products = await _repository.GetAllAsync();
-            return products.Select(ProductMapper.ToDto);
+            return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
 
         public async Task<ProductDto?> GetProductById(int id)
@@ -52,7 +56,7 @@ namespace StoreApi.Services
             {
                 return null;
             }
-            return ProductMapper.ToDto(product);
+            return _mapper.Map<ProductDto>(product); ;
         }
 
         public async Task<bool> Update(int id,UpdateProductDto dto)
@@ -61,7 +65,7 @@ namespace StoreApi.Services
             if (product == null)
                 return false;
             
-            ProductMapper.UpdateEntity(product, dto);
+           _mapper.Map(dto, product);
             await _repository.SaveChangesAsync();
 
             return true;

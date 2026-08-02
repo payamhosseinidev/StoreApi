@@ -8,6 +8,7 @@ using StoreApi.Services;
 using FluentValidation;
 using StoreApi.Validators;
 using StoreApi.DTOs;
+using StoreApi.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,8 +49,9 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         return new BadRequestObjectResult(response);
     };
 });
-
+builder.Services.AddAutoMapper(typeof(ProductProfile));
 builder.Services.AddScoped<IValidator<CreateProductDto>, CreateProductDtoValidator>();
+
 
 var app = builder.Build();
 

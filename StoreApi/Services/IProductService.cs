@@ -1,15 +1,14 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using StoreApi.Common;
 using StoreApi.DTOs;
-using StoreApi.Models;
 
 namespace StoreApi.Services
 {
     public interface IProductService
     {
-        Task<IEnumerable<ProductDto>> GetAllProducts();
-        Task<ProductDto?> GetProductById(int id);
-        Task<bool> Add(CreateProductDto dto);
-        Task<bool> Update(int id,UpdateProductDto product);
-        Task<bool> Delete(int id);
+        Task<Result<IEnumerable<ProductDto>>> GetAllProducts();
+        Task<Result<ProductDto>> GetProductById(int id);
+        Task<Result<ProductDto>> Add(CreateProductDto dto);
+        Task<Result<ProductDto>> Update(int id,UpdateProductDto product);
+        Task<Result<bool>> Delete(int id);
     }
 }

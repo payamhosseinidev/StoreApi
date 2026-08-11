@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using StoreApi.Common;
 using StoreApi.DTOs;
 using StoreApi.Mapping;
 using StoreApi.Models;
@@ -20,7 +21,7 @@ namespace StoreApi.Services
             _mapper = mapper;
         }
 
-        public async Task<bool> Add(CreateProductDto dto)
+        public async Task<Result<ProductDto>> Add(CreateProductDto dto)
         {
             var validationResult = await _validator.ValidateAsync(dto);
             if (!validationResult.IsValid)
@@ -28,47 +29,75 @@ namespace StoreApi.Services
                 throw new ValidationException(validationResult.Errors);
             }
             var product = _mapper.Map<Product>(dto);
+            product.CreatedAt = DateTime.UtcNow;
             await _repository.AddAsync(product);
             await _repository.SaveChangesAsync();
-            return true;
+
+            var productDto = _mapper.Map<ProductDto>(product);
+            return Result<ProductDto>.SuccessResult(
+                    productDto,
+                    "محصول با موفقیت ایجاد شد"
+            );
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<Result<bool>> Delete(int id)
         {
             var product = await _repository.GetByIdAsync(id);
             if(product == null)
-                return false;
+                return Result<bool>.Failure(
+                    "محصول مورد نظر پیدا نشد"
+                    );
             await _repository.DeleteAsync(product);
             await _repository.SaveChangesAsync();
-            return true;
+            return Result<bool>.SuccessResult(
+                true,
+                "محصول با موفقیت حذف شد"
+                );
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllProducts()
+        public async Task<Result<IEnumerable<ProductDto>>> GetAllProducts()
         {
             var products = await _repository.GetAllAsync();
-            return _mapper.Map<IEnumerable<ProductDto>>(products);
+            var productDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
+            return Result<IEnumerable<ProductDto>>.SuccessResult(
+                productDtos,
+                "محصولات با موفقیت دریافت شدند"
+                );
         }
 
-        public async Task<ProductDto?> GetProductById(int id)
+        public async Task<Result<ProductDto>> GetProductById(int id)
         {
             var product = await _repository.GetByIdAsync(id);
             if (product == null)
             {
-                return null;
+                return Result<ProductDto>.Failure(
+                    "محصول پیدا نشد"
+                );
             }
-            return _mapper.Map<ProductDto>(product); ;
+            var productDto = _mapper.Map<ProductDto>(product);
+            return Result<ProductDto>.SuccessResult(
+                productDto,
+                "محصول با موفقیت دریافت شد"
+            );
         }
 
-        public async Task<bool> Update(int id,UpdateProductDto dto)
+        public async Task<Result<ProductDto>> Update(int id,UpdateProductDto dto)
         {
             var product = await _repository.GetByIdAsync(id);
             if (product == null)
-                return false;
+                return Result<ProductDto>.Failure(
+                    "محصول مورد نظر پیدا نشد"
+                    );
             
+            //save new data on existing DTO, Not create new Product
            _mapper.Map(dto, product);
             await _repository.SaveChangesAsync();
 
-            return true;
+            var productDto = _mapper.Map<ProductDto>(product);
+            return Result<ProductDto>.SuccessResult(
+                productDto,
+                "محصول با موفقیت بروزرسانی شد"
+                );
           
         }
 

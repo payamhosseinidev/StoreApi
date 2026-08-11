@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using StoreApi.Common;
 using StoreApi.DTOs;
 using StoreApi.Models;
 using StoreApi.Services;
@@ -19,43 +20,43 @@ namespace StoreApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
         {
-            var products = await _productService.GetAllProducts();
-            return Ok(products);
+            var result = await _productService.GetAllProducts();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
-            var product = await _productService.GetProductById(id);
-            if (product == null)
-                return NotFound();
+            var result = await _productService.GetProductById(id);
+            if (!result.Success)
+                return NotFound(result);
 
-            return Ok(product);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id,UpdateProductDto dto)
+        public async Task<ActionResult<Result<ProductDto>>> UpdateProduct(int id,UpdateProductDto dto)
         {
             var result = await _productService.Update(id,dto);
-            if (!result)
-                return NotFound();
-            
-            return NoContent();
+            if (!result.Success)
+                return NotFound(result);
+
+            return Ok(result);
         }
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<ActionResult<Result<bool>>> DeleteProduct(int id)
         {
-            var success = await _productService.Delete(id);
-            if (!success)
-                return NotFound();
+            var result = await _productService.Delete(id);
+            if (!result.Success)
+                return NotFound(result);
 
-            return NoContent();
+            return Ok(result);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateProduct(CreateProductDto dto)
+        public async Task<ActionResult<Result<ProductDto>>> CreateProduct(CreateProductDto dto)
         {
-            await _productService.Add(dto);
-            return Created();
+            var result = await _productService.Add(dto);
+            return Ok(result);
         }
     }
 }

@@ -58,5 +58,14 @@ namespace StoreApi.Controllers
             var result = await _productService.Add(dto);
             return Ok(result);
         }
+
+        [HttpGet("paged")]
+        public async Task<ActionResult<Result<PaginationDto<ProductDto>>>> GetProductsPaged(int page = 1,int pageSize = 3)
+        {
+            var result = await _productService.GetProductsPaged(page,pageSize);
+            if (!result.Success)
+                return BadRequest(result);
+            return Ok(result);
+        }
     }
 }

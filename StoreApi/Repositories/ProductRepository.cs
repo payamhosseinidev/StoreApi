@@ -40,5 +40,15 @@ namespace StoreApi.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<(IEnumerable<Product> Products, int TotalCount)> GetPagedAsync(int page, int pageSize)
+        {
+            var query = _context.Products.AsQueryable();
+
+            var totalCount = await query.CountAsync();
+
+            var products = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            return (products, totalCount);
+        }
     }
 }

@@ -101,5 +101,35 @@ namespace StoreApi.Services
           
         }
 
+        public async Task<Result<PaginationDto<ProductDto>>> GetProductsPaged(int page, int pageSize)
+        {
+            if (page < 1)
+            {
+                return Result<PaginationDto<ProductDto>>.Failure("شماره صفحه باید بزرگتر از صفر باشد");
+            }
+            if(pageSize < 1 || pageSize > 100)
+            {
+                return Result<PaginationDto<ProductDto>>.Failure("تعداد محصولات در هر صفحه باید بین 1 تا 100 باشد");
+            }
+            var (products,totalCount) = await _repository.GetPagedAsync(page, pageSize);
+
+            var productDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            var pagination = new PaginationDto<ProductDto>
+            {
+                Items = productDtos,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = totalPages
+            };
+
+            return Result<PaginationDto<ProductDto>>.SuccessResult
+            (
+                pagination,
+                "محصولات با موفقیت دریافت شدند"
+            );
+        }
     }
 }

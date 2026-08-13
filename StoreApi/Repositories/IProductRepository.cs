@@ -1,11 +1,16 @@
-﻿using StoreApi.Models;
+﻿using StoreApi.DTOs;
+using StoreApi.Models;
 
 namespace StoreApi.Repositories
 {
     public interface IProductRepository
     {
         Task<IEnumerable<Product>> GetAllAsync();
-        Task<(IEnumerable<Product> Products, int TotalCount)> GetPagedAsync(int page,int pageSize); 
+        Task<(IEnumerable<Product> Products, int TotalCount)> GetPagedAsync(
+            int page,
+            int pageSize,
+            ProductFilterDto? filter
+            ); 
 
         Task<Product?> GetByIdAsync(int id);
 

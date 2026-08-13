@@ -101,7 +101,7 @@ namespace StoreApi.Services
           
         }
 
-        public async Task<Result<PaginationDto<ProductDto>>> GetProductsPaged(int page, int pageSize)
+        public async Task<Result<PaginationDto<ProductDto>>> GetProductsPaged(int page, int pageSize,ProductFilterDto? filter)
         {
             if (page < 1)
             {
@@ -111,7 +111,7 @@ namespace StoreApi.Services
             {
                 return Result<PaginationDto<ProductDto>>.Failure("تعداد محصولات در هر صفحه باید بین 1 تا 100 باشد");
             }
-            var (products,totalCount) = await _repository.GetPagedAsync(page, pageSize);
+            var (products,totalCount) = await _repository.GetPagedAsync(page, pageSize,filter);
 
             var productDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);

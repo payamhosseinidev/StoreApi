@@ -60,9 +60,27 @@ namespace StoreApi.Controllers
         }
 
         [HttpGet("paged")]
-        public async Task<ActionResult<Result<PaginationDto<ProductDto>>>> GetProductsPaged(int page = 1,int pageSize = 3)
+        public async Task<ActionResult<Result<PaginationDto<ProductDto>>>> GetProductsPaged(
+            int page = 1,
+            int pageSize = 3,
+            string? search = null,
+            string? category = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string? sortBy = null,
+            string? sortOrder = null
+            )
         {
-            var result = await _productService.GetProductsPaged(page,pageSize);
+            var filter = new ProductFilterDto
+            {
+                Search = search,
+                Category = category,
+                MinPrice = minPrice,
+                MaxPrice = maxPrice,
+                SortBy = sortBy,
+                SortOrder = sortOrder
+            };
+            var result = await _productService.GetProductsPaged(page,pageSize, filter);
             if (!result.Success)
                 return BadRequest(result);
             return Ok(result);

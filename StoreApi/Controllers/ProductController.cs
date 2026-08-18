@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using StoreApi.Common;
 using StoreApi.DTOs;
@@ -7,6 +8,7 @@ using StoreApi.Services;
 
 namespace StoreApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
@@ -43,6 +45,8 @@ namespace StoreApi.Controllers
 
             return Ok(result);
         }
+
+        [Authorize(Roles ="Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<Result<bool>>> DeleteProduct(int id)
         {

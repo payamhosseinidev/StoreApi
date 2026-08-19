@@ -1,4 +1,5 @@
-﻿using StoreApi.Common;
+﻿using FluentValidation;
+using StoreApi.Common;
 using StoreApi.DTOs;
 using StoreApi.Models;
 using StoreApi.Repositories;
@@ -9,14 +10,27 @@ namespace StoreApi.Services
     {
         private readonly IUserRepository _repository;
         private readonly IJwtService _jwtService;
-        public AuthService(IUserRepository repository,IJwtService jwtService)
+        private readonly IValidator<RegisterDto> _registerValidator;
+        private readonly IValidator<LoginDto> _loginValidator;
+        public AuthService(IUserRepository repository,IJwtService jwtService, IValidator<RegisterDto> registerValidator,
+    IValidator<LoginDto> loginValidator)
         {
             _repository = repository;
             _jwtService = jwtService;
+            _loginValidator = loginValidator;
+            _registerValidator = registerValidator;
         }
 
         public async Task<Result<string>> Register(RegisterDto dto)
         {
+
+            var validationResult = await _registerValidator.ValidateAsync(dto);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var existingUser = await _repository.GetByUsernameAsync(dto.Username);
 
             if (existingUser != null)
@@ -25,7 +39,7 @@ namespace StoreApi.Services
                         "این نام کاربری قبلا ثبت شده است"
                 );
             }
-            
+
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             var user = new User
             {
@@ -46,6 +60,14 @@ namespace StoreApi.Services
 
         public async Task<Result<string>> Login(LoginDto dto)
         {
+
+            var validationResult = await _loginValidator.ValidateAsync(dto);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var user =
                 await _repository.GetByUsernameAsync(dto.Username);
 

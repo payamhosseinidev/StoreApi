@@ -86,6 +86,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 builder.Services.AddAutoMapper(typeof(ProductProfile));
 builder.Services.AddScoped<IValidator<CreateProductDto>, CreateProductDtoValidator>();
+builder.Services.AddScoped<IValidator<RegisterDto>,RegisterDtoValidator>();
+builder.Services.AddScoped<IValidator<LoginDto>,LoginDtoValidator>();
 
 //
 builder.Services
@@ -123,8 +125,6 @@ app.UseMiddleware<ExeptionMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-
-app.UseAuthorization();
 
 app.UseAuthorization();
 

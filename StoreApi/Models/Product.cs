@@ -26,5 +26,7 @@ namespace StoreApi.Models
        public int Stock { get; set; }
 
        public DateTime CreatedAt { get; set; }
+
+       public ICollection<OrderItem> OrdersItems { get; set; } = new List<OrderItem>();
     }
 }

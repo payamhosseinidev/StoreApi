@@ -13,6 +13,7 @@ using StoreApi.Responses;
 using StoreApi.Services;
 using StoreApi.Validators;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +25,17 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService,CurrentUserService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
-builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter()
+        );
+    }); ;
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -88,6 +98,8 @@ builder.Services.AddAutoMapper(typeof(ProductProfile));
 builder.Services.AddScoped<IValidator<CreateProductDto>, CreateProductDtoValidator>();
 builder.Services.AddScoped<IValidator<RegisterDto>,RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<LoginDto>,LoginDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateOrderDto>, CreateOrderDtoValidator>();
+builder.Services.AddScoped<IValidator<UpdateOrderStatusDto>, UpdateOrderStatusDtoValidator>();
 
 //
 builder.Services

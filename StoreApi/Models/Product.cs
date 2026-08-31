@@ -28,5 +28,7 @@ namespace StoreApi.Models
        public DateTime CreatedAt { get; set; }
 
        public ICollection<OrderItem> OrdersItems { get; set; } = new List<OrderItem>();
+
+       public byte[] RowVersion { get; set; } = Array.Empty<byte>();
     }
 }

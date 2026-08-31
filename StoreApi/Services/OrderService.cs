@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using StoreApi.Common;
 using StoreApi.DTOs;
 using StoreApi.Models;
@@ -58,59 +59,79 @@ namespace StoreApi.Services
             var products = await _repository.GetProductsByIdsAsync(productIds);
 
             //Check if all Products exist
-            if(products.Count != productIds.Count)
+            if (products.Count != productIds.Count)
             {
                 return Result<OrderDto>.Failure("یک یا چند محصول پیدا نشد");
             }
 
-            //Check if Stock exists for every item
-            foreach(var item in dto.Items)
+            await _repository.BeginTransactionAsync();
+
+            try
             {
-                var product = products.First(p=>p.Id == item.ProductId);
-                if (product.Stock < item.Quantity)
+                //Check if Stock exists for every item
+                foreach (var item in dto.Items)
                 {
-                    return Result<OrderDto>.Failure(
-                         $"موجودی محصول {product.Name} کافی نیست."
-                    );
+                    var product = products.First(p => p.Id == item.ProductId);
+                    if (product.Stock < item.Quantity)
+                    {
+                        return Result<OrderDto>.Failure(
+                             $"موجودی محصول {product.Name} کافی نیست."
+                        );
+                    }
                 }
+                //Create Order
+                var order = new Order
+                {
+                    UserId = userId.Value,
+                    CreatedAt = DateTime.UtcNow,
+                    Status = OrderStatus.Pending
+                };
+                //Find product from database for each item user has sent, then add it to OrderItem 
+                foreach (var item in dto.Items)
+                {
+                    var product = products
+                        .First(p => p.Id == item.ProductId);
+
+                    var orderItem = new OrderItem
+                    {
+                        ProductId = product.Id,
+                        Product = product,
+                        Quantity = item.Quantity,
+                        UnitPrice = product.Price
+                    };
+
+                    order.Items.Add(orderItem);
+                    // Product is tracked by the DbContext,
+                    // so EF Core detects the Stock change on SaveChangesAsync().
+                    product.Stock -= item.Quantity;
+                }
+
+                await _repository.AddAsync(order);
+                await _repository.SaveChangesAsync();
+
+                await _repository.CommitTransactionAsync();
+
+                var orderDto = _mapper.Map<OrderDto>(order);
+
+                return Result<OrderDto>.SuccessResult(
+                    orderDto,
+                    "سفارش با موفقیت ایجاد شد"
+                );
+            }
+
+            catch(DbUpdateConcurrencyException)
+            {
+                await _repository.RollbackTransactionAsync();
+                return Result<OrderDto>.Failure(
+                    "موجودی محصول توسط کاربر دیگری تغییر کرده است. لطفا دوباره تلاش کنید"
+                );
+            }
+            catch
+            {
+                await _repository.RollbackTransactionAsync();
+                throw;
             }
             
-            //Create Order
-            var order = new Order
-            {
-                UserId = userId.Value,
-                CreatedAt = DateTime.UtcNow,
-                Status = OrderStatus.Pending
-            };
-            //Find product from database for each item user has sent, then add it to OrderItem 
-            foreach (var item in dto.Items)
-            {
-                var product = products
-                    .First(p => p.Id == item.ProductId);
-
-                var orderItem = new OrderItem
-                {
-                    ProductId = product.Id,
-                    Product = product,
-                    Quantity = item.Quantity,
-                    UnitPrice = product.Price
-                };
-
-                order.Items.Add(orderItem);
-                // Product is tracked by the DbContext,
-                // so EF Core detects the Stock change on SaveChangesAsync().
-                product.Stock -= item.Quantity;
-            }
-
-            await _repository.AddAsync(order);
-            await _repository.SaveChangesAsync();
-
-            var orderDto = _mapper.Map<OrderDto>(order);
-
-            return Result<OrderDto>.SuccessResult(
-                orderDto,
-                "سفارش با موفقیت ایجاد شد"
-            );
         }
 
         public async Task<Result<List<OrderDto>>> GetAllAsync()
@@ -153,7 +174,7 @@ namespace StoreApi.Services
             if(order is null)
                 return Result<OrderDto>.Failure("سفارش پیدا نشد.");
 
-            if(order.UserId !=  userId.Value)
+            if(_currentUserService.Role != "Admin" && order.UserId != userId.Value)
                 return Result<OrderDto>.Failure("شما به این سفارش دسترسی ندارید.");
 
             var orderDto = _mapper.Map<OrderDto>(order);

@@ -44,6 +44,10 @@ namespace StoreApi.Data
                 .Property(p => p.Price)
                 .HasPrecision(18, 2);
 
+            modelBuilder.Entity<Product>()
+                .Property(p => p.RowVersion)
+                .IsRowVersion();
+
             modelBuilder.Entity<OrderItem>()
                 .Property(oi => oi.UnitPrice)
                 .HasPrecision(18, 2);

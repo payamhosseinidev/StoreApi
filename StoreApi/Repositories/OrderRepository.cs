@@ -16,7 +16,6 @@ namespace StoreApi.Repositories
         {
             await _context.Orders.AddAsync(order);
         }
-
         public async Task<List<Order>> GetAllAsync()
         {
             return await _context.Orders
@@ -49,6 +48,19 @@ namespace StoreApi.Repositories
             return await _context.Products
                 .Where(p => productIds.Contains(p.Id))
                 .ToListAsync();
+        }
+        public async Task BeginTransactionAsync()
+        {
+            await _context.Database.BeginTransactionAsync();
+        }
+
+        public async Task CommitTransactionAsync()
+        {
+            await _context.Database.CommitTransactionAsync();
+        }
+        public async Task RollbackTransactionAsync()
+        {
+            await _context.Database.RollbackTransactionAsync();
         }
 
         public async Task SaveChangesAsync()

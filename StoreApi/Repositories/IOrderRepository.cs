@@ -9,6 +9,12 @@ namespace StoreApi.Repositories
         Task<List<Product>> GetProductsByIdsAsync(List<int> productIds);
         Task<List<Order>> GetAllByUserIdAsync(int userId);
         Task<List<Order>> GetAllAsync();
+
         Task SaveChangesAsync();
+
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
+
     }
 }

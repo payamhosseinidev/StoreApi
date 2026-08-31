@@ -12,7 +12,11 @@ namespace StoreApi.Mapping
 
             CreateMap<UpdateProductDto, Product>();
 
-            CreateMap<Product, ProductDto>();
+            CreateMap<Product, ProductDto>()
+                .ForMember(
+                    dest => dest.CategoryName,
+                    opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty)
+                );
 
         }
     }

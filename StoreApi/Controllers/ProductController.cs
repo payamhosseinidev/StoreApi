@@ -68,7 +68,7 @@ namespace StoreApi.Controllers
             int page = 1,
             int pageSize = 3,
             string? search = null,
-            string? category = null,
+            int? categoryId = null,
             decimal? minPrice = null,
             decimal? maxPrice = null,
             string? sortBy = null,
@@ -78,7 +78,7 @@ namespace StoreApi.Controllers
             var filter = new ProductFilterDto
             {
                 Search = search,
-                Category = category,
+                CategoryId = categoryId,
                 MinPrice = minPrice,
                 MaxPrice = maxPrice,
                 SortBy = sortBy,

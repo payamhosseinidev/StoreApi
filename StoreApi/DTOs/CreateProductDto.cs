@@ -15,7 +15,7 @@ namespace StoreApi.DTOs
         public string Description { get; set; } = string.Empty;
 
         [Required]
-        public string Category { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
 
         [Display(Name = "قیمت")]
         [Range(1, 1000000000,

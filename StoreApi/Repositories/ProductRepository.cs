@@ -16,12 +16,17 @@ namespace StoreApi.Repositories
 
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            return await _context.Products.AsNoTracking().ToListAsync();
+            return await _context.Products
+                .Include(p=>p.Category)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<Product?> GetByIdAsync(int id)
         {
-            return await _context.Products.FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Products
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public Task AddAsync(Product product)
@@ -48,7 +53,9 @@ namespace StoreApi.Repositories
             ProductFilterDto? filter
             )
         {
-            var query = _context.Products.AsQueryable();
+            var query = _context.Products
+                .Include(p => p.Category)
+                .AsQueryable();
 
             // Search
             if (!string.IsNullOrWhiteSpace(filter?.Search))
@@ -59,9 +66,9 @@ namespace StoreApi.Repositories
             }
 
             // Category
-            if (!string.IsNullOrWhiteSpace(filter?.Category))
+            if (filter?.CategoryId.HasValue == true)
             {
-                query = query.Where(p=>p.Category == filter.Category);
+                query = query.Where(p=>p.CategoryId == filter.CategoryId);
             }
             if(filter?.MinPrice.HasValue == true)
             {
@@ -92,6 +99,7 @@ namespace StoreApi.Repositories
             var products = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .AsNoTracking()
                 .ToListAsync();
 
             return (products, totalCount);

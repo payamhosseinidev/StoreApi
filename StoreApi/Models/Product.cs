@@ -14,8 +14,9 @@ namespace StoreApi.Models
        [StringLength(500)]
        public string Description { get; set; } = string.Empty;
 
-       [Required]
-       public string Category { get; set; } =  string.Empty;
+       public int? CategoryId { get; set; }
+
+       public Category? Category { get; set; } = null!;
 
        [Range(1, 1000000000)]
        public decimal Price { get; set; }

@@ -27,6 +27,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService,CurrentUserService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 
 builder.Services.AddControllers()
@@ -100,6 +102,7 @@ builder.Services.AddScoped<IValidator<RegisterDto>,RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<LoginDto>,LoginDtoValidator>();
 builder.Services.AddScoped<IValidator<CreateOrderDto>, CreateOrderDtoValidator>();
 builder.Services.AddScoped<IValidator<UpdateOrderStatusDto>, UpdateOrderStatusDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateCategoryDto>,CreateCategoryValidator>();
 
 //
 builder.Services

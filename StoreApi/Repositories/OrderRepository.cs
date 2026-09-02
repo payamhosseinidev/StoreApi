@@ -40,6 +40,7 @@ namespace StoreApi.Repositories
             return await _context.Orders
                 .Include(x=>x.Items)
                 .ThenInclude(x=>x.Product)
+                .Include(x=>x.Payment)
                 .FirstOrDefaultAsync(o=>o.Id == id);
         }
 

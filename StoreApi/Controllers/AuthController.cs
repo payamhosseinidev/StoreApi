@@ -51,5 +51,29 @@ namespace StoreApi.Controllers
                 Role = _currentUser.Role
             });
         }
+
+        [HttpPost("refresh")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Refresh(RefreshTokenDto dto)
+        {
+            var result = await _authService.RefreshAsync(dto.RefreshToken);
+
+            if(!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("logout")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Logout(LogoutDto dto)
+        {
+            var result = await _authService.LogoutAsync(dto.RefreshToken);
+
+            if(!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
     }
 }

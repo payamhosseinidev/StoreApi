@@ -9,5 +9,6 @@
         public string Role { get; set; } = "User";
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }
